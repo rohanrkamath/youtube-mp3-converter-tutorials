@@ -1,0 +1,63 @@
+# When changes made to auth server
+to delete user (admin) via terminal - mysql -uroot -e "DROP USER auth_user@localhost"
+to delete database auth via terminal - mysql -uroot -e "DROP DATABASE auth"
+to run mysql via termial - mysql -uroot
+to run mysql with the init.sql file created - mysql -uroot < init.sql
+to start mysql server - brew services start mysql
+
+# MySQL -uroot nav
+show databases;
+use auth (database name);
+show tables;
+describe user (table name);
+
+# Basic Auth
+1. outside world has no access to the private kubernetes network
+2. therefore need to send requests to gateways, in order to let them use of the distributed system deployed in the private kubernetes clusters.
+3. gateways is where we can add functionalities for the application (login, upload, etc in the server.py file)
+4. Auth services are used to determine when to give access from the outside world.
+5. This is done by creating creds in the auth db. 
+6. If there is a match, a jwt is send back to the client. 
+7. In summary, the client transmits credentials as user ID/password pairs, encoded using base64 to server to validate. 
+
+# JWT
+1. Has three parts (header, payload, verify signature)
+2. Each path is Base64 encoded. 
+    a. header 
+    -> Contain key value pair of the signing algorithm(HS256) and typ(jwt)
+    -> User logs in, auth service creates a jwt, signed using the private key (using HS256, a symmetric signing algo that uses 1 private key) and sent back to the user.
+    -> Therefore the next time the user logs in, the jwt token is sent too, and the auth server verifies it, only then the user has access to the resources. 
+    b. payload
+    -> Contains "claims", some are user defined (username, password) and some are not (jwt expiration date).
+    c. signature
+    -> created by taking 
+        HS256 ( 
+        base64(header) + base64(payload) + 256-bit-secret 
+        )
+    -> the secret we define as an enviroment var.
+    -> the jwt token sent by out cleint can be verified if it was signed by our private key and our signing algorithm. If so, we can check the clients access levels by decoding the payload.
+
+# Server as a docker container 
+1. Our server wil be a docker container, and the application will be in the container.
+2. When Docker container is switched on, it will be given its own ip address (inside the docker network).
+3. Use this ip address to send requests to the container, that is our server.
+4. But we have to tell our Flask server to listen to the docker container for requests. 
+5. Host config, its the server we are hosting our application in (the server that is hosting our flask application is the docker container it is running in).
+6. But the docker containers ip address is subject to change, therefore setting it to 0.0.0.0, telling the flask application to listen to any/all our docker containers ip addresses.
+7. If this is not done, it will default to localhost, so can listen to only requests from within the server, and not listen to requests from outside the server (as is not publicly accessable)
+8. After setting the host ip to 0.0.0.0, the flask app will listen to all the requests incoming to the application, even if the container is part of 2 different docker networks.
+
+# Authorization headers
+1. Authorization <type> <credentials>
+2. type == basic -> username:password pairs | type == bearer -> token 
+
+# docker
+1. Each intruction in the dockerfile results in a single new image layer being created, therefore the next intructions image layer will be built upon the previous image layer.
+2. Therefore if a layer needs to change, the layers before need not change, only the current changed layer and the layer after it has to be rebuilt.
+3. Previous layers are retained using cache. 
+
+# kubernetes
+1. Helped with load balancing and auto scaling.
+2. Read kubernetes docs for more information - https://kubernetes.io/docs/reference/kubernetes-api/
+
+
