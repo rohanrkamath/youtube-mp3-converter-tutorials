@@ -1,0 +1,19 @@
+ingress - 
+1. Service can be thought of as a group of pods
+2. Selector: label selector tells the service which pods are under its group or umbrella
+3. Ingress is a load balancer that is an entry point into the cluster with a set of rules stating which rules goes where.
+4. For example, we have a rule saying if mp3convertor.com is being accessed from outside, it is routed to the gateway service inside in teh cluster.
+
+Configutations for ingress - 
+1. sudo vim /etc/hosts -> 127.0.0.1 mp3convertor.com
+2. minikube addons list (check if ingress is enabled or disabled)
+3. minilkube addons enable ingress
+4. minikube tunnel (to start testing)
+
+Kubectl commands:
+1. kubectl apply -f ./
+2. if wanna scale down service - kubectl scale deployment --replicas=0 gateway
+3. check for errors with pod is not working - kubectl describe pod <pod name>
+4. can check scripts by - kubectl describe <script.yaml>
+5. kubectl delete -f ./
+
