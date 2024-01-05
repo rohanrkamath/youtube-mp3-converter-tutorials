@@ -55,9 +55,58 @@ describe user (table name);
 1. Each intruction in the dockerfile results in a single new image layer being created, therefore the next intructions image layer will be built upon the previous image layer.
 2. Therefore if a layer needs to change, the layers before need not change, only the current changed layer and the layer after it has to be rebuilt.
 3. Previous layers are retained using cache. 
+   
+   Commands for Dockerfile:
+   1. Create dockerfile 
+   2. Build dcokerfile: docker build .
+   3. Tag dockerfile: docker tag <tag number> username/reponame:latest
+   4. Push dockerfile: docker push username/reponame:latest
 
 # kubernetes
 1. Helped with load balancing and auto scaling.
 2. Read kubernetes docs for more information - https://kubernetes.io/docs/reference/kubernetes-api/
+3. Kubernetes has pods, that hold Docker images. 
+4. Kubernetes objects are yaml files that specify the specifications of the pods. 
+5. Each obejct has different specifitions, depending on the "kind".
+
+    Commands for Kubernetes - 
+    1. k9s to check clusters
+    2. kubectl apply -f ./ (creates/updates resources; added services)
+
+# mongoDB (PyMongo) and GridFs
+1. GridFs is used to store BSON files exceeding 16mb (MongoDB doesnt allow this, limitation) by sharding it and storing it as separate document.
+
+# Overall Architecture:
+1. Client is verified by Auth service using JWT tokens.
+2. After authurization, the video is sent via the gateway, and is stored in MongoDB.
+3. A message is sent to the queue, therefore the downstream services know there is a video to be processed.
+4. The convertor service gets the message from the queue, gets the ID of the video from MongoDB, converts the file and stores the MP3 to MongoDB.
+5. A new message is then sent through the queue to the notification service which notifies the client that the MP3 file is ready via email (contains MP3 ID)
+6. The cleint then sends a request with the ID and JWT to download the MP3 to the gateway service.
+7. The gateway service then returns the file to be downloaded. 
+
+# Interservice communications:
+    1. Synchronous - Client is blocked until the server responds (gateway to auth)
+    2. Asynchronous - Non blocking request, client is not blocked and need not wait till the server responds. Achieved using queue (gateway to conversion, conversion to notification)
+
+# Consistency:
+    1. Strong consistency: Makes sure the request is sent directly to the service and is sent back to the client. Makes sure the client gets the latest data (Client -> conversion service -> Client). Higer latency.
+    2. Eventual consistency: Our architecture. The data might not be readily available but, after a certain time, it will be. Lower latency.
+     
+# rabbitMQ
+1. Can configure multiple queues in one RabbitMQ instance.
+2. Our architure - a video queue and a mp3 queue.
+3. The exchange route messages to correct queue based on certiain creteria.
+4. Default exchange is an empty string (exchange: ""), there the routing key can be set to the name of the queue name.
+5. There are more messages than the consumer can handle, RMQ scales up the customer. This is done by competing consumers pattern.
+6. Competing consumers patterns allows multiple concurrent consumers to recieve messages from the same messages channel.
+7. Done using round robin algorithm.
+
+
+
+
+
+
+
 
 

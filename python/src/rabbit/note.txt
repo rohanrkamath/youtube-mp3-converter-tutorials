@@ -1,0 +1,16 @@
+StatefulSet:
+
+1. Similar to deployment and scaling of set of pods, and the pods are based on an identical container spec
+2. but here each pod has a persistant identifier that it maintains across any rescheduling.
+3. Therefore if a pod fails, the data isnt lost. Each pod can reference its own physical storage.
+4. One master pod, that can read/write from its storage, while others are slaves that can only read from theirs.
+5. The physical storage that the slaves use continuously sync with the master pods storage. 
+6. This architecture: Only one replica.
+7. Mount physical storage to our local to the container instance. So if the container dies, it still has access to the data.
+
+Persistant Volumn Claim: is going to be bound to a persistant volume. The claim will determine how much storage we want to set from the persistant volumn
+Persistant Volume is the one interacting with the physical storage.
+
+Pod -> Persistant Volume -> Persistent Volume -> Physical Storage
+
+after kubectl apply and there is an error in the statefulset.yaml, have to delete using kubectl delete -f ./, and re-apply again.
